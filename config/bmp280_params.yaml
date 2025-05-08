@@ -1,0 +1,5 @@
+bmp280_node:
+  ros__parameters:
+    i2c_bus: 1
+    i2c_address: 118   # decimal for 0x76
+    publish_rate: 10.0
