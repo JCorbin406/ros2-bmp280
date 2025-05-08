@@ -1,77 +1,110 @@
-# ros2-bmp280
+# bmp280 - ROS 2 Pressure and Temperature Sensor Node
 
-ROS 2 driver for the Bosch BMP280 temperature and barometric pressure sensor. This package reads data over the I2C bus and publishes ROS 2 sensor messages for use in embedded or mobile robotics systems.
+This ROS 2 package provides a Python-based node that interfaces with the BMP280 barometric pressure and temperature sensor over I2C. It publishes sensor data to standard ROS 2 topics using `sensor_msgs/msg/Temperature` and `sensor_msgs/msg/FluidPressure`.
+
+---
 
 ## Features
 
-- Publishes temperature and pressure data via ROS 2 topics
-- Configurable update rate
-- Designed for Raspberry Pi running ROS 2 Jazzy Jalisco
-- Easily extendable for other Bosch sensors (e.g., BME280)
+- Communicates with BMP280 via I2C
+- Publishes temperature in Celsius and pressure in Pascals
+- Uses onboard factory calibration coefficients
+- Fully configurable via YAML and launch files
+- Compatible with Raspberry Pi (tested on Pi 4 with ROS 2 Jazzy)
 
 ---
 
 ## Installation
 
-Clone this repository into your ROS 2 workspace:
+### Clone into your ROS 2 workspace
 
 ```bash
 cd ~/ros2_ws/src
-git clone git@github.com:JCorbin406/ros2-bmp280.git
+git clone https://github.com/JCorbin406/bmp280.git
+```
+
+### Build the workspace
+
+```bash
 cd ~/ros2_ws
-colcon build
+colcon build --packages-select bmp280
 source install/setup.bash
 ```
 
 ---
 
-## Hardware Setup
-
-- Connect the BMP280 sensor to your Raspberry Pi via I2C
-- Default I2C address: `0x76` (or `0x77` depending on breakout board)
-- Enable I2C on your Raspberry Pi (via `raspi-config` or manually)
-
----
-
 ## Usage
 
-### Launch the node
+### Launch the sensor node with default parameters:
 
 ```bash
 ros2 launch bmp280 bmp280.launch.py
 ```
 
-### Parameters (in `config/bmp280.yaml`)
+This loads configuration from:
+```
+bmp280/config/bmp280_config.yaml
+```
 
-- `i2c_bus` (int): I2C bus number (e.g., `1` for `/dev/i2c-1`)
-- `i2c_address` (int): I2C address of the sensor (`118` for `0x76`)
-- `frame_id` (str): Frame name for the published messages
-- `publish_rate` (float): Rate in Hz at which to publish data
+You can also manually run the node:
+
+```bash
+ros2 run bmp280 bmp280_node
+```
+
+---
+
+## Parameters
+
+You can customize behavior via the YAML config file:
+
+```yaml
+bmp280_node:
+  ros__parameters:
+    i2c_bus: 1               # I2C bus (typically 1 on Raspberry Pi)
+    i2c_address: 118         # Decimal address (118 = 0x76 or 119 = 0x77)
+    publish_rate: 10.0       # Hz
+```
 
 ---
 
 ## Topics
 
-- `/bmp280/data` (`sensor_msgs/msg/FluidPressure` + `sensor_msgs/msg/Temperature`): Pressure and temperature readings
+The node publishes:
+
+| Topic               | Type                         | Description                   |
+|---------------------|------------------------------|-------------------------------|
+| `/bmp280/temperature` | `sensor_msgs/msg/Temperature` | Ambient temperature in Celsius |
+| `/bmp280/pressure`    | `sensor_msgs/msg/FluidPressure` | Barometric pressure in Pascals |
 
 ---
 
-## Example Output
+## File Structure
 
-```bash
-$ ros2 topic echo /bmp280/data
-temperature: 24.87
-pressure: 100325.67
+```
+bmp280/
+├── config/
+│   └── bmp280_config.yaml
+├── launch/
+│   └── bmp280.launch.py
+├── bmp280/
+│   ├── __init__.py
+│   ├── driver.py            # Sensor driver
+│   └── bmp280_node.py       # ROS 2 node
+├── package.xml
+├── setup.py
+└── LICENSE
 ```
 
 ---
 
 ## License
 
-Licensed under the [Apache License 2.0](LICENSE).
+This project is licensed under the [Apache License 2.0](LICENSE).
 
 ---
 
-## Author
+## Maintainer
 
-Jack Corbin — [JCorbin406](https://github.com/JCorbin406)
+Jack Corbin
+[https://github.com/JCorbin406](https://github.com/JCorbin406)
